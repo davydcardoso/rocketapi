@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Companys {
+  id         String   @id @default(uuid())
+  name       String   @db.VarChar(180)
+  document   String   @db.VarChar(20)
+  admin_id   String   @db.VarChar(80)
+  created_at DateTime @db.Date
+  updated_at DateTime @updatedAt @db.Timestamp
+
+  @@map("companys")
+}
+
+model Users {
+  id            String    @id @default(uuid())
+  name          String    @db.VarChar(180)
+  email         String    @unique @db.VarChar(180)
+  password      String    @db.VarChar(255)
+  token_version Int       @default(0)
+  profile       String    @db.VarChar(255)
+  created_at    DateTime  @default(now()) @db.Date
+  updated_at    DateTime? @updatedAt @db.Timestamp
+
+  tickets Tickets[]
+  queues  Queues[]
+
+  @@map("users")
+}
+
+model Contacts {
+  id              String    @id @default(uuid())
+  name            String    @db.VarChar(180)
+  number          String    @unique @db.VarChar(21)
+  email           String    @default("") @db.VarChar(255)
+  profile_pic_url String    @db.VarChar(255)
+  is_group        Boolean   @default(false)
+  created_at      DateTime  @default(now()) @db.Date
+  updated_at      DateTime? @updatedAt @db.Timestamp
+
+  tickets              Tickets[]
+  contact_custom_field ContactCustomField[]
+  messages             Messages[]
+
+  @@map("contacts")
+}
+
+model ContactCustomField {
+  id         String    @id @default(uuid())
+  name       String    @db.VarChar(180)
+  value      String    @db.VarChar(255)
+  created_at DateTime  @default(now()) @db.Date
+  updated_at DateTime? @updatedAt @db.Timestamp
+
+  contacts Contacts[]
+
+  @@map("contact_custom_field")
+}
+
+model Messages {
+  id         String    @id @default(uuid())
+  ack        Int       @default(0)
+  read       Boolean   @default(false)
+  from_me    Boolean   @default(false)
+  body       String    @db.Text
+  media_url  String?
+  media_type String
+  is_deleted Boolean   @default(false)
+  created_at DateTime  @default(now()) @db.Date
+  updated_at DateTime? @updatedAt @db.Timestamp
+
+  tickets  Tickets[]
+  contacts Contacts[]
+
+  @@map("messages")
+}
+
+model Whatsapps {
+  id               String    @id @default(uuid())
+  whatsappId       Int       @unique
+  name             String    @db.Text
+  sessions         String    @db.Text
+  qrcode           String    @db.Text
+  status           String    @db.VarChar(255)
+  battery          String    @db.VarChar(180)
+  plugged          Boolean
+  retries          Int
+  greeting_message String
+  farewell_message String    @db.Text
+  is_default       Boolean   @default(false)
+  created_at       DateTime  @default(now()) @db.Date
+  updated_at       DateTime? @updatedAt @db.Timestamp
+
+  tickets Tickets[]
+  queues  Queues[]
+
+  @@map("whatsapps")
+}
+
+model Settings {
+  id         String    @id @default(uuid())
+  key        String    @unique @db.VarChar(255)
+  value      String    @db.VarChar(255)
+  created_at DateTime  @default(now()) @db.Date
+  updated_at DateTime? @updatedAt @db.Timestamp
+
+  @@map("settings")
+}
+
+model QuickAnswer {
+  id         String    @id @default(uuid())
+  shortcut   String    @db.VarChar(255)
+  message    String
+  created_at DateTime  @default(now()) @db.Date
+  updated_at DateTime? @updatedAt @db.Timestamp
+
+  @@map("quick_answer")
+}
+
+model Tickets {
+  id              String    @id @default(uuid())
+  status          String    @default("pending") @db.VarChar(180)
+  unread_messages Int
+  last_message    String    @db.VarChar(255)
+  is_group        Boolean   @default(false)
+  created_at      DateTime  @default(now()) @db.Date
+  updated_at      DateTime? @updatedAt @db.Timestamp
+
+  users     Users[]
+  contacts  Contacts[]
+  messages  Messages[]
+  whatsapps Whatsapps[]
+
+  @@map("tickets")
+}
+
+model Queues {
+  id               String    @id @default(uuid())
+  name             String    @db.VarChar(180)
+  color            String    @db.VarChar(180)
+  greeting_message String    @db.VarChar(200)
+  created_at       DateTime  @default(now()) @db.Date
+  updated_at       DateTime? @updatedAt @db.Timestamp
+
+  users     Users[]
+  whatsapps Whatsapps[]
+
+  @@map("queues")
+}
